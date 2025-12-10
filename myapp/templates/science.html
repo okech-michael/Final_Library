@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Books</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .book-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .book-img {
+            height: 280px;
+            object-fit: cover;
+            width: 100%;
+        }
+        .rating-badge {
+            background-color: #ffc107;
+            color: #000;
+        }
+        .tag-badge {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+        .price-text {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #198754;
+        }
+        .free-text {
+            color: #dc3545;
+        }
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="text-center mb-4">Science Books</h1>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="Search books by title, author, or tag...">
+        </div>
+
+        <div class="row g-4" id="bookGrid">
+            {% for book in books %}
+            <div class="col-md-6 col-lg-4 book-item" 
+                 data-title="{{ book.title|lower }}" 
+                 data-author="{{ book.author|lower }}" 
+                 data-tag="{{ book.tag|lower }}">
+                <div class="card book-card">
+                    {% if book.image %}
+                        <img src="{{ book.image.url }}" class="card-img-top book-img" alt="{{ book.title }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/200x280" class="card-img-top book-img" alt="{{ book.title }}">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ book.title }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ book.author }}</h6>
+                        <p class="card-text">{{ book.description|truncatewords:20 }}</p>
+                        <div class="mb-2">
+                            <span class="badge rating-badge me-2">
+                                <i class="fas fa-star"></i> {{ book.rating }}
+                            </span>
+                            <span class="badge tag-badge">{{ book.tag|title }}</span>
+                        </div>
+                        {% if book.price == 0 %}
+                            <p class="price-text free-text mb-3">Free</p>
+                        {% else %}
+                            <p class="price-text mb-3">Ksh {{ book.price }}</p>
+                        {% endif %}
+                        <a href="{% url 'book_detail' book.id %}" class="btn btn-primary mt-auto">Read More</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center" role="alert">
+                    No books available at the moment.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            const bookItems = document.querySelectorAll('.book-item');
+            
+            bookItems.forEach(function(item) {
+                const title = item.getAttribute('data-title');
+                const author = item.getAttribute('data-author');
+                const tag = item.getAttribute('data-tag');
+                
+                if (title.includes(searchTerm) || author.includes(searchTerm) || tag.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

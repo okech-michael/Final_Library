@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LibraryHub - Modern Digital Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #faf5ff 100%);
+        }
+        
+        .glassmorphic {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        
+        .scroll-container {
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
+        }
+        
+        .scroll-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .scroll-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .sidebar-transition {
+            transition: transform 0.3s ease;
+        }
+        
+        .book-card-img {
+            transition: transform 0.3s ease;
+        }
+        
+        .book-card:hover .book-card-img {
+            transform: scale(1.1);
+        }
+        
+        .notification-badge {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .subscribe-btn {
+            animation: shimmer 3s infinite;
+            background: linear-gradient(45deg, #f59e0b, #eab308, #f59e0b);
+            background-size: 200% 200%;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Top Navigation -->
+    <nav class="glassmorphic border-b border-slate-200 sticky top-0 z-50">
+        <div class="px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleSidebar()" class="lg:hidden">
+                        <i class="fas fa-bars text-slate-600 text-xl"></i>
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-book-open text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">LibraryHub</span>
+                    </div>
+                </div>
+
+                <div class="flex-1 max-w-2xl mx-8 hidden md:block">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search across all books..."
+                            class="w-full pl-12 pr-4 py-3 bg-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                            oninput="searchBooks()"
+                        />
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Subscribe Button -->
+                    <a href="payments.html" class="subscribe-btn hidden md:flex items-center gap-2 px-6 py-2.5 rounded-xl text-white font-bold shadow-lg hover:shadow-xl transition-all">
+                        <i class="fas fa-crown"></i>
+                        <span>Subscribe Now</span>
+                    </a>
+                    
+                    <button onclick="toggleNotifications()" class="relative p-2 hover:bg-slate-100 rounded-xl transition-all">
+                        <i class="fas fa-bell text-slate-600 text-xl"></i>
+                        <span class="notification-badge absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <div class="relative">
+                        <button
+                            onclick="toggleProfile()"
+                            class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center hover:shadow-lg transition-all"
+                        >
+                            <i class="fas fa-user text-white"></i>
+                        </button>
+                        <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 glassmorphic rounded-2xl shadow-xl border border-slate-200 py-2 z-50">
+                            <button onclick="alert('Profile clicked')" class="w-full px-4 py-2 text-left hover:bg-slate-50 transition-all">
+                                <i class="fas fa-user-circle mr-2"></i> Profile
+                            </button>
+                            <button onclick="alert('Settings clicked')" class="w-full px-4 py-2 text-left hover:bg-slate-50 transition-all">
+                                <i class="fas fa-cog mr-2"></i> Settings
+                            </button>
+                            <button onclick="logout()" class="w-full px-4 py-2 text-left hover:bg-slate-50 text-red-500 transition-all">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar-transition fixed lg:static inset-y-0 left-0 z-40 w-72 glassmorphic border-r border-slate-200 mt-[73px] lg:mt-0 -translate-x-full lg:translate-x-0">
+            <div class="p-6 space-y-2">
+                <button onclick="changeMenu('dashboard')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg" data-menu="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span class="font-medium">Dashboard</span>
+                </button>
+                <button onclick="changeMenu('browse')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 hover:bg-slate-100" data-menu="browse">
+                    <i class="fas fa-book-open"></i>
+                    <span class="font-medium">Browse Books</span>
+                </button>
+                <button onclick="changeMenu('cart')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 hover:bg-slate-100" data-menu="cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="font-medium">My Cart</span>
+                    <span id="cartBadge" class="ml-auto bg-blue-500 text-white px-2 py-1 rounded-lg text-xs">0</span>
+                </button>
+                <button onclick="changeMenu('library')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 hover:bg-slate-100" data-menu="library">
+                    <i class="fas fa-book"></i>
+                    <span class="font-medium">My Library</span>
+                </button>
+                <button onclick="changeMenu('recommendations')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 hover:bg-slate-100" data-menu="recommendations">
+                    <i class="fas fa-magic"></i>
+                    <span class="font-medium">Recommendations</span>
+                </button>
+                <button onclick="changeMenu('settings')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 hover:bg-slate-100" data-menu="settings">
+                    <i class="fas fa-cog"></i>
+                    <span class="font-medium">Settings</span>
+                </button>
+
+                <!-- Subscribe Button in Sidebar (Mobile) -->
+                <a href="payments.html" class="md:hidden subscribe-btn w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white font-bold shadow-lg hover:shadow-xl transition-all">
+                    <i class="fas fa-crown"></i>
+                    <span>Subscribe Now</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 lg:p-8 overflow-auto">
+            <!-- Welcome Header with Subscribe Banner -->
+            <div class="mb-8">
+                <div class="flex items-start justify-between flex-wrap gap-4">
+                    <div>
+                        <h1 class="text-4xl font-bold text-slate-800 mb-2">Welcome back, Student!</h1>
+                        <p class="text-slate-600">Continue your learning journey today</p>
+                    </div>
+                    <!-- Premium Banner -->
+                    <div class="glassmorphic rounded-2xl p-4 border-2 border-yellow-400 shadow-lg max-w-sm">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-crown text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800">Unlock Full Access</h3>
+                                <p class="text-xs text-slate-600">Get unlimited books & features</p>
+                            </div>
+                        </div>
+                        <a href="payments.html" class="block w-full subscribe-btn text-center px-4 py-2 rounded-xl text-white font-bold shadow-lg hover:shadow-xl transition-all">
+                            Subscribe to Premium
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="glassmorphic rounded-2xl p-6 shadow-lg border border-slate-200 hover-lift">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-shopping-cart text-white text-xl"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-slate-800 mb-1">0</div>
+                    <div class="text-slate-600 text-sm">Books in Cart</div>
+                </div>
+                
+                <div class="glassmorphic rounded-2xl p-6 shadow-lg border border-slate-200 hover-lift">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-book-open text-white text-xl"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-slate-800 mb-1">0</div>
+                    <div class="text-slate-600 text-sm">Books Borrowed</div>
+                </div>
+                
+                <div class="glassmorphic rounded-2xl p-6 shadow-lg border border-slate-200 hover-lift">
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-clock text-white text-xl"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-slate-800 mb-1">0</div>
+                    <div class="text-slate-600 text-sm">Hours Read</div>
+                </div>
+                
+                <div class="glassmorphic rounded-2xl p-6 shadow-lg border border-slate-200 hover-lift">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-white text-xl"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-slate-800 mb-1">0</div>
+                    <div class="text-slate-600 text-sm">Recommendations</div>
+                </div>
+            </div>
+
+            <!-- Subscription CTA Section -->
+            <section class="mb-8">
+                <div class="glassmorphic rounded-3xl p-8 shadow-xl border-2 border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-crown text-yellow-500 text-2xl"></i>
+                                <h2 class="text-3xl font-bold text-slate-800">Subscribe to Access Full Materials</h2>
+                            </div>
+                            <p class="text-slate-600 mb-4">Get unlimited access to our entire library of books, exclusive content, and premium features.</p>
+                            <ul class="space-y-2 mb-6">
+                                <li class="flex items-center gap-2 text-slate-700">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                    <span>Unlimited book downloads</span>
+                                </li>
+                                <li class="flex items-center gap-2 text-slate-700">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                    <span>Access to premium content</span>
+                                </li>
+                                <li class="flex items-center gap-2 text-slate-700">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                    <span>AI-powered recommendations</span>
+                                </li>
+                                <li class="flex items-center gap-2 text-slate-700">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                    <span>Ad-free experience</span>
+                                </li>
+                            </ul>
+                            <a href="payments.html" class="subscribe-btn inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-lg shadow-xl hover:shadow-2xl transition-all">
+                                <i class="fas fa-crown"></i>
+                                <span>Subscribe Now - Access Full Materials</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="w-full md:w-auto">
+                            <div class="w-48 h-48 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform">
+                                <i class="fas fa-book-open text-white text-6xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recommended Books -->
+            <section class="mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fas fa-magic text-purple-500"></i>
+                            AI-Powered Recommendations
+                        </h2>
+                        <p class="text-slate-600 text-sm mt-1">Based on your reading history</p>
+                    </div>
+                    <a href="#" class="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+                        View All <i class="fas fa-chevron-right text-sm"></i>
+                    </a>
+                </div>
+                <div class="text-center py-12 text-slate-600">
+                    <i class="fas fa-book text-4xl mb-4 text-slate-400"></i>
+                    <p>No recommendations available yet. Start reading to get personalized suggestions!</p>
+                </div>
+            </section>
+
+            <!-- My Cart Preview -->
+            <section class="mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fas fa-shopping-cart text-blue-500"></i>
+                        My Cart (0)
+                    </h2>
+                    <a href="#" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all">
+                        Go to Cart
+                    </a>
+                </div>
+                <p class="text-slate-600">Your cart is empty</p>
+            </section>
+
+            <!-- Continue Reading -->
+            <section class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <i class="fas fa-book-reader text-green-500"></i>
+                    Continue Reading
+                </h2>
+                <p class="text-slate-600">No books in progress</p>
+            </section>
+
+            <!-- Browse Categories -->
+            <section class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-800 mb-6">Browse Categories</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <a href="#" class="glassmorphic rounded-2xl p-6 shadow-lg border border-slate-200 hover-lift group">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-3xl group-hover:scale-110 transition-transform">
+                            📚
+                        </div>
+                        <div class="font-semibold text-slate-800 text-center">Fiction</div>
+                    </a>
+                    <a href="#" class="glassmorphic rounded-2xl p-6 shadow-lg border border-slate-200 hover-lift group">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-3xl group-hover:scale-110 transition-transform">
+                            🔬
+                        </div>
+                        <div class="font-semibold text-slate-800 text-center">Science</div>
+                    </a>
+                    <a href="#" class="glassmorphic rounded-2xl p-6 shadow-lg border border-slate-200 hover-lift group">
+                        <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-3xl group-hover:scale-110 transition-transform">
+                            📖
+                        </div>
+                        <div class="font-semibold text-slate-800 text-center">History</div>
+                    </a>
+                    <a href="#" class="glassmorphic rounded-2xl p-6 shadow-lg border border-slate-200 hover-lift group">
+                        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-3xl group-hover:scale-110 transition-transform">
+                            💻
+                        </div>
+                        <div class="font-semibold text-slate-800 text-center">Technology</div>
+                    </a>
+                    <a href="#" class="glassmorphic rounded-2xl p-6 shadow-lg border border-slate-200 hover-lift group">
+                        <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-3xl group-hover:scale-110 transition-transform">
+                            🎨
+                        </div>
+                        <div class="font-semibold text-slate-800 text-center">Arts</div>
+                    </a>
+                    <a href="#" class="glassmorphic rounded-2xl p-6 shadow-lg border border-slate-200 hover-lift group">
+                        <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-3xl group-hover:scale-110 transition-transform">
+                            🏥
+                        </div>
+                        <div class="font-semibold text-slate-800 text-center">Health</div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="mt-12 pt-8 border-t border-slate-200">
+                <div class="flex flex-wrap justify-center gap-6 text-sm text-slate-600">
+                    <a href="#" class="hover:text-blue-600 transition-colors">About</a>
+                    <a href="#" class="hover:text-blue-600 transition-colors">Help</a>
+                    <a href="#" class="hover:text-blue-600 transition-colors">Terms</a>
+                    <a href="#" class="hover:text-blue-600 transition-colors">Contact</a>
+                </div>
+                <p class="text-center text-slate-500 text-sm mt-4">© 2024 LibraryHub. All rights reserved.</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // Toggle Sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        // Toggle Profile Dropdown
+        function toggleProfile() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Toggle Notifications
+        function toggleNotifications() {
+            alert('Notifications feature coming soon!');
+        }
+
+        // Change Menu
+        function changeMenu(menuName) {
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-purple-600', 'text-white', 'shadow-lg');
+                item.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+            
+            const activeItem = document.querySelector(`[data-menu="${menuName}"]`);
+            activeItem.classList.remove('text-slate-600', 'hover:bg-slate-100');
+            activeItem.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-purple-600', 'text-white', 'shadow-lg');
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                alert('Logging out...');
+            }
+        }
+
+        // Search Books
+        function searchBooks() {
+            const query = document.getElementById('searchInput').value;
+            if (query.length > 2) {
+                alert('Searching for: ' + query);
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const profile = document.getElementById('profileDropdown');
+            const profileBtn = event.target.closest('button');
+            
+            if (!profileBtn || !profileBtn.onclick || profileBtn.onclick.toString().indexOf('toggleProfile') === -1) {
+                profile.classList.add('hidden');
+            }
+        });
+
+        // Handle enter key in search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchBooks();
+            }
+        });
+    </script>
+</body>
+</html>
